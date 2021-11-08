@@ -44,7 +44,7 @@ public class ServerProxy {
                 result = (LoginResult) gson.fromJson(respData, LoginResult.class);
             }
             else {
-                InputStream respBody = http.getInputStream();
+                InputStream respBody = http.getErrorStream();
                 String respData= readString(respBody);
 
                 result = (LoginResult) gson.fromJson(respData, LoginResult.class);
@@ -54,6 +54,7 @@ public class ServerProxy {
             e.printStackTrace();
         }
 
+        DataCache cache = DataCache.getInstance(result.getAuthtoken(), result.getPersonID());
         return result;
     }
 
@@ -84,7 +85,7 @@ public class ServerProxy {
                 result = (RegisterResult) gson.fromJson(respData, RegisterResult.class);
             }
             else {
-                InputStream respBody = http.getInputStream();
+                InputStream respBody = http.getErrorStream();
                 String respData= readString(respBody);
 
                 result = (RegisterResult) gson.fromJson(respData, RegisterResult.class);
@@ -94,12 +95,83 @@ public class ServerProxy {
             e.printStackTrace();
         }
 
+        DataCache cache = DataCache.getInstance(result.getAuthtoken(), result.getPersonID());
         return result;
     }
 
-    public PersonResult getPeople(PersonRequest request) {return null;}
+    public PersonResult getPeople(PersonRequest request) {
+        PersonResult result = null;
 
-    public EventResult getEvents(EventRequest request) {return null;}
+        try {
+            ServerInfo serverInfo = ServerInfo.getInstance();
+            URL url = new URL("http://" + serverInfo.getHost() + ":" +
+                    serverInfo.getPort() + "/person");
+
+            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            http.setRequestMethod("GET");
+            http.setDoOutput(false);
+
+            http.addRequestProperty("Authorization", request.getAuthToken());
+            http.addRequestProperty("Accept", "application/json");
+            http.connect();
+
+            Gson gson = new Gson();
+            if (http.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                InputStream respBody = http.getInputStream();
+                String respData= readString(respBody);
+
+                result = (PersonResult) gson.fromJson(respData, PersonResult.class);
+            }
+            else {
+                InputStream respBody = http.getErrorStream();
+                String respData= readString(respBody);
+
+                result = (PersonResult) gson.fromJson(respData, PersonResult.class);
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public EventResult getEvents(EventRequest request) {
+        EventResult result = null;
+
+        try {
+            ServerInfo serverInfo = ServerInfo.getInstance();
+            URL url = new URL("http://" + serverInfo.getHost() + ":" +
+                    serverInfo.getPort() + "/event");
+
+            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            http.setRequestMethod("GET");
+            http.setDoOutput(false);
+
+            http.addRequestProperty("Authorization", request.getAuthToken());
+            http.addRequestProperty("Accept", "application/json");
+            http.connect();
+
+            Gson gson = new Gson();
+            if (http.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                InputStream respBody = http.getInputStream();
+                String respData= readString(respBody);
+
+                result = (EventResult) gson.fromJson(respData, EventResult.class);
+            }
+            else {
+                InputStream respBody = http.getErrorStream();
+                String respData= readString(respBody);
+
+                result = (EventResult) gson.fromJson(respData, EventResult.class);
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
 
     private static String readString(InputStream is) throws IOException {
         StringBuilder sb = new StringBuilder();
