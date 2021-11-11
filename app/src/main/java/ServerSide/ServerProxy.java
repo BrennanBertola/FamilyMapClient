@@ -54,7 +54,6 @@ public class ServerProxy {
             e.printStackTrace();
         }
 
-        DataCache cache = DataCache.getInstance(result.getAuthtoken(), result.getPersonID());
         return result;
     }
 
@@ -95,7 +94,6 @@ public class ServerProxy {
             e.printStackTrace();
         }
 
-        DataCache cache = DataCache.getInstance(result.getAuthtoken(), result.getPersonID());
         return result;
     }
 

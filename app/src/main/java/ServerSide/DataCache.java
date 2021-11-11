@@ -16,7 +16,7 @@ public class DataCache {
 
     private static DataCache instance;
 
-    //only used within server login and register
+    //only used within login task
     public static DataCache getInstance(String givenToken, String personID) {
         if (instance == null) {
             instance = new DataCache(givenToken, personID);
