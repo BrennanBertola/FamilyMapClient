@@ -5,14 +5,8 @@ public class ServerInfo {
     private static String host;
     private static String port;
 
-    public static ServerInfo getInstance(String givenHost, String givenPort) {
-        if (instance == null) {
-            instance = new ServerInfo(givenHost, givenPort);
-        }
-        else if (!host.equals(givenHost) || !port.equals(givenPort)){
-            instance = new ServerInfo(givenHost, givenPort);
-        }
-        return instance;
+    public static void setInfo(String givenHost, String givenPort) {
+        instance = new ServerInfo(givenHost, givenPort);
     }
 
     public static ServerInfo getInstance() {

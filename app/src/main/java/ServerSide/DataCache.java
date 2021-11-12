@@ -17,14 +17,8 @@ public class DataCache {
     private static DataCache instance;
 
     //only used within login task
-    public static DataCache getInstance(String givenToken, String personID) {
-        if (instance == null) {
-            instance = new DataCache(givenToken, personID);
-        }
-        else if (!authToken.equals(givenToken)){
-            instance = new DataCache(givenToken, personID);
-        }
-        return instance;
+    public static void createCache(String givenToken, String personID) {
+        instance = new DataCache(givenToken, personID);
     }
 
     public static DataCache getInstance() {
@@ -98,6 +92,7 @@ public class DataCache {
     }
 
     //==================Data Management Portion================//
+
     private Person user;
     private static String authToken;
 
@@ -130,5 +125,33 @@ public class DataCache {
         if (people.containsKey(person.getMotherID())) {
             findSides(people.get(person.getMotherID()), fatherSide);
         }
+    }
+
+    public Person getUser() {
+        return user;
+    }
+
+    public static String getAuthToken() {
+        return authToken;
+    }
+
+    public HashMap<String, Person> getPeople() {
+        return people;
+    }
+
+    public HashMap<String, List<Event>> getPersonEvents() {
+        return personEvents;
+    }
+
+    public HashMap<String, Event> getEvents() {
+        return events;
+    }
+
+    public TreeSet<String> getDadSide() {
+        return dadSide;
+    }
+
+    public TreeSet<String> getMomSide() {
+        return momSide;
     }
 }
