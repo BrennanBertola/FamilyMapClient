@@ -14,4 +14,8 @@
     <!-- Button Names -->
     <string name="signIn">SIGN IN</string>
     <string name="register">REGISTER</string>
+
+    <!-- Map Stuff -->
+    <string name="mainActivityTitle">Map</string>
+    <string name="mapFragmentMessage">This is my map fragment!</string>
 </resources>
