@@ -24,10 +24,7 @@ import ServerSide.DataCache;
 import ServerSide.ServerInfo;
 import ServerSide.ServerProxy;
 
-import com.joanzapata.iconify.Iconify;
-import com.joanzapata.iconify.fonts.FontAwesomeModule;
-import com.joanzapata.iconify.IconDrawable;
-import com.joanzapata.iconify.fonts.FontAwesomeIcons;
+
 
 public class MainActivity extends AppCompatActivity implements LoginFragment.Listener {
     private static final String LOGIN_KEY = "login";
@@ -37,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.Lis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Iconify.with(new FontAwesomeModule());
+        getSupportActionBar().setTitle("Family Map");
 
         FragmentManager fragmentManager = this.getSupportFragmentManager();
         Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentFrameLayout);

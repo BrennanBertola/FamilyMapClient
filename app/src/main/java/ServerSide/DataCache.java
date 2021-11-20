@@ -56,6 +56,7 @@ public class DataCache {
         people = new HashMap<>();
         personEvents = new HashMap<>();
         events = new HashMap<>();
+        showedEvents = new HashMap<>();
 
         ServerProxy proxy = new ServerProxy();
 
@@ -75,6 +76,7 @@ public class DataCache {
         //builds events and personEvents
         for (int i = 0; i < eventData.length; ++i) {
             events.put(eventData[i].getEventID(), eventData[i]);
+            showedEvents.put(eventData[i].getEventID(), true);
 
             String key = eventData[i].getPersonID();
             if(personEvents.containsKey(key)) {
@@ -91,6 +93,38 @@ public class DataCache {
         }
     }
 
+    private List<Event> sortList(List<Event> passedList) {
+        List<Event> newList = new ArrayList<>();
+        List<Event> list = new ArrayList<>(passedList);
+
+        while (list.size() > 0) {
+            int minYear = 9999;
+            int index = 0;
+            Event trackedEvent = list.get(0);
+            for (int i = 0; i < list.size(); ++i) {
+                if (list.get(i).getYear() < minYear) {
+                    trackedEvent = list.get(i);
+                    minYear = trackedEvent.getYear();
+                    index = i;
+                }
+                else if (list.get(i).getYear() == minYear &&
+                        list.get(i).getEventType().toLowerCase().equals("birth")) {
+                    trackedEvent = list.get(i);
+                    index = i;
+                }
+                else if (list.get(i).getYear() == minYear &&
+                        !list.get(i).getEventType().toLowerCase().equals("death")) {
+                    trackedEvent = list.get(i);
+                    index = i;
+                }
+            }
+            newList.add(trackedEvent);
+            list.remove(index);
+        }
+
+        return newList;
+    }
+
     //==================Data Management Portion================//
 
     private Person user;
@@ -102,6 +136,7 @@ public class DataCache {
 
     //use event id as key.
     private HashMap<String, Event> events;
+    private HashMap<String, Boolean> showedEvents;
 
     //stores person IDs on dad and mom side.
     private TreeSet<String> dadSide;
@@ -135,17 +170,27 @@ public class DataCache {
         return authToken;
     }
 
-    public HashMap<String, Person> getPeople() {
-        return people;
+    public Person getPerson(String id) {
+        return people.get(id);
     }
 
-    public HashMap<String, List<Event>> getPersonEvents() {
-        return personEvents;
+    public List<Event> getPersonEvents(String id) { return personEvents.get(id);}
+    public List<Event> getSortedEvents(String id) {
+        List<Event> returnVal = personEvents.get(id);
+        return sortList(returnVal);
+    }
+    public Event getFirstEvent(String id) {
+        List<Event> tmp = getSortedEvents(id);
+        if (tmp == null || tmp.size() == 0) {
+            return null;
+        }
+        return tmp.get(0);
     }
 
     public HashMap<String, Event> getEvents() {
         return events;
     }
+    public boolean showEvent(String id) {return showedEvents.get(id);}
 
     public TreeSet<String> getDadSide() {
         return dadSide;

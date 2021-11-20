@@ -11,4 +11,6 @@
     <color name="pink_700">#FB6F92</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="maleBlue">#89cff0</color>
+    <color name="femalePink">#f8b9d4</color>
 </resources>

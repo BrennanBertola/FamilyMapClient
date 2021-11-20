@@ -17,5 +17,9 @@
 
     <!-- Map Stuff -->
     <string name="mainActivityTitle">Map</string>
-    <string name="mapFragmentMessage">This is my map fragment!</string>
+    <string name="mapFragmentMessage">Select an event to see more details</string>
+    <string name="searchMenu">Search</string>
+    <string name="searchSelected">Search not yet implemented</string>
+    <string name="settingMenu">Settings</string>
+    <string name="settingSelected">Settings not yet implemented</string>
 </resources>
