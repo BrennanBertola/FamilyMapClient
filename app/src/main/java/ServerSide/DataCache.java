@@ -42,11 +42,12 @@ public class DataCache {
         //user is in neither, easy fix if you don't want this down the road.
         findSides(people.get(user.getFatherID()), true);
         findSides(people.get(user.getMotherID()), false);
-
+        loggedIn = true;
     }
 
     private DataCache () {
         mainSetUp();
+        loggedIn = true;
         user = null;
         dadSide = null;
         momSide = null;
@@ -57,6 +58,7 @@ public class DataCache {
         personEvents = new HashMap<>();
         events = new HashMap<>();
         showedEvents = new HashMap<>();
+        peopleList = new ArrayList<>();
 
         ServerProxy proxy = new ServerProxy();
 
@@ -70,6 +72,7 @@ public class DataCache {
 
         //builds people
         for (int i = 0; i < peopleData.length; ++i) {
+            peopleList.add(peopleData[i]);
             people.put(peopleData[i].getPersonID(), peopleData[i]);
         }
 
@@ -129,8 +132,10 @@ public class DataCache {
 
     private Person user;
     private static String authToken;
+    boolean loggedIn = false;
 
     //uses Person id as Key for more quicker look up.
+    private ArrayList<Person> peopleList;
     private HashMap<String, Person> people;
     private HashMap<String, List<Event>> personEvents;
 
@@ -170,6 +175,8 @@ public class DataCache {
         return authToken;
     }
 
+    public boolean isLoggedIn() {return loggedIn;}
+
     public Person getPerson(String id) {
         return people.get(id);
     }
@@ -198,5 +205,47 @@ public class DataCache {
 
     public TreeSet<String> getMomSide() {
         return momSide;
+    }
+
+    public List<Person> getFamily(String id) {
+        Person person = people.get(id);
+        ArrayList<Person> retList = getChildren(id);
+
+        String desiredID = person.getFatherID();
+        if (desiredID != null) {
+            retList.add(people.get(desiredID));
+        }
+
+        desiredID = person.getMotherID();
+        if (desiredID != null) {
+            retList.add(people.get(desiredID));
+        }
+
+        desiredID = person.getSpouseID();
+        if (desiredID != null) {
+            retList.add(people.get(desiredID));
+        }
+
+
+
+        return retList;
+    }
+
+    private ArrayList<Person> getChildren(String id) {
+        ArrayList<Person> retList = new ArrayList<>();
+
+        for (int i = 0; i < peopleList.size(); ++i) {
+            Person curr = peopleList.get(i);
+            if(curr.getFatherID().equals(id)) {
+                retList.add(curr);
+                continue;
+            }
+            else if (curr.getMotherID().equals(id)) {
+                retList.add(curr);
+                continue;
+            }
+        }
+
+        return retList;
     }
 }

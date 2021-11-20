@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.*;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -26,7 +27,7 @@ import ServerSide.ServerProxy;
 
 
 
-public class MainActivity extends AppCompatActivity implements LoginFragment.Listener {
+public class MainActivity extends AppCompatActivity implements LoginFragment.Listener, MapFragment.Listener {
     private static final String LOGIN_KEY = "login";
     private static final String REGISTER_KEY = "register";
 
@@ -39,7 +40,8 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.Lis
         FragmentManager fragmentManager = this.getSupportFragmentManager();
         Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentFrameLayout);
         if(fragment == null) {
-            fragment = createFirstFragment();
+            fragment = createLoginFragment();
+
 
             fragmentManager.beginTransaction()
                     .add(R.id.fragmentFrameLayout, fragment)
@@ -53,10 +55,23 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.Lis
         }
     }
 
-    private Fragment createFirstFragment() {
+    private Fragment createLoginFragment() {
         LoginFragment fragment = new LoginFragment();
         fragment.registerListener(this);
         return fragment;
+    }
+
+    private Fragment createMapFragment() {
+        MapFragment fragment = new MapFragment();
+        fragment.registerListener(this);
+        return fragment;
+    }
+
+    @Override
+    public void switchToPerson(Person person) {
+        Intent intent = new Intent(MainActivity.this, PersonActivity.class);
+        intent.putExtra(PersonActivity.PERSON_KEY, person.getPersonID());
+        startActivity(intent);
     }
 
     @Override
@@ -78,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.Lis
 
                 if (success) {
                     FragmentManager fragManager = getSupportFragmentManager();
-                    Fragment frag = new MapFragment();
+                    Fragment frag = createMapFragment();
                     fragManager.beginTransaction()
                             .replace(R.id.fragmentFrameLayout, frag)
                             .commit();
@@ -131,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.Lis
 
                 if (success) {
                     FragmentManager fragManager = getSupportFragmentManager();
-                    Fragment frag = new MapFragment();
+                    Fragment frag = createMapFragment();
                     fragManager.beginTransaction()
                             .replace(R.id.fragmentFrameLayout, frag)
                             .commit();

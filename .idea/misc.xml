@@ -5,9 +5,14 @@
       <map>
         <entry key="..\:/Users/brenn/AndroidStudioProjects/FamilyMapClient/app/src/main/res/layout/activity_main.xml" value="0.2695035460992908" />
         <entry key="..\:/Users/brenn/cs240/FamilyMapClient/app/src/main/res/layout/activity_main.xml" value="0.2695035460992908" />
+        <entry key="..\:/Users/brenn/cs240/FamilyMapClient/app/src/main/res/layout/activity_person.xml" value="0.19832826747720364" />
+        <entry key="..\:/Users/brenn/cs240/FamilyMapClient/app/src/main/res/layout/event_item.xml" value="0.16160081053698075" />
+        <entry key="..\:/Users/brenn/cs240/FamilyMapClient/app/src/main/res/layout/item_list.xml" value="0.16160081053698075" />
         <entry key="..\:/Users/brenn/cs240/FamilyMapClient/app/src/main/res/layout/login_fragment.xml" value="0.3333333333333333" />
         <entry key="..\:/Users/brenn/cs240/FamilyMapClient/app/src/main/res/layout/map_container.xml" value="0.21574074074074073" />
         <entry key="..\:/Users/brenn/cs240/FamilyMapClient/app/src/main/res/layout/map_fragment.xml" value="0.21574074074074073" />
+        <entry key="..\:/Users/brenn/cs240/FamilyMapClient/app/src/main/res/layout/person_activity.xml" value="0.19832826747720364" />
+        <entry key="..\:/Users/brenn/cs240/FamilyMapClient/app/src/main/res/layout/person_item.xml" value="0.16160081053698075" />
         <entry key="..\:/Users/brenn/cs240/FamilyMapClient/app/src/main/res/menu/main_menu.xml" value="0.32447916666666665" />
         <entry key="..\:/Users/brenn/cs240/FamilyMapClient/app/src/main/res/xml/network_securtiy_config.xml" value="0.1540020263424519" />
       </map>

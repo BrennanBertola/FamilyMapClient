@@ -2,6 +2,7 @@ package com.example.familymapclient;
 
 
 import android.app.ActionBar;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -53,7 +54,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private int currColor = 0;
     private Person person = null;
 
-
+    private Listener listener;
+    public interface Listener {
+        void switchToPerson(Person person);
+    }
+    public void registerListener(MapFragment.Listener listener) {
+        this.listener = listener;
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater layoutInflater, ViewGroup container, Bundle savedInstanceState) {
@@ -68,7 +75,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getActivity(), "Person Activity Not Yet Implemented", Toast.LENGTH_SHORT).show();
+                if (listener != null) {
+                    listener.switchToPerson(person);
+                }
             }
         });
         return view;
