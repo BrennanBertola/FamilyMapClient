@@ -18,4 +18,5 @@
         android:textStyle="bold"
         tools:text="The Title" />
 
+
 </LinearLayout>

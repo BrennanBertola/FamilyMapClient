@@ -236,13 +236,17 @@ public class DataCache {
 
         for (int i = 0; i < peopleList.size(); ++i) {
             Person curr = peopleList.get(i);
-            if(curr.getFatherID().equals(id)) {
-                retList.add(curr);
-                continue;
+            if(curr.getFatherID() != null) {
+                if (curr.getFatherID().equals(id)) {
+                    retList.add(curr);
+                    continue;
+                }
             }
-            else if (curr.getMotherID().equals(id)) {
-                retList.add(curr);
-                continue;
+            if (curr.getMotherID() != null) {
+                if (curr.getMotherID().equals(id)) {
+                    retList.add(curr);
+                    continue;
+                }
             }
         }
 

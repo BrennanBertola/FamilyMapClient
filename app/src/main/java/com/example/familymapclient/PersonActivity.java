@@ -5,6 +5,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,7 +13,12 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.joanzapata.iconify.IconDrawable;
+import com.joanzapata.iconify.fonts.FontAwesomeIcons;
 
 import java.util.List;
 
@@ -22,6 +28,7 @@ import ServerSide.DataCache;
 
 public class PersonActivity extends AppCompatActivity {
     public static final String PERSON_KEY = "person key";
+    Person person;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +41,7 @@ public class PersonActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String personID = intent.getStringExtra(PERSON_KEY);
         DataCache cache = DataCache.getInstance();
-        Person person = cache.getPerson(personID);
+        person = cache.getPerson(personID);
 
         TextView textView = findViewById(R.id.personFirstName);
         textView.setText(person.getFirstName());
@@ -196,17 +203,76 @@ public class PersonActivity extends AppCompatActivity {
             textView.setText(eventInfo);
 
             DataCache cache = DataCache.getInstance();
-            Person person = cache.getPerson(event.getPersonID());
-            String name = person.getFirstName() + " " + person.getLastName();
+            Person currPerson = cache.getPerson(event.getPersonID());
+            String name = currPerson.getFirstName() + " " + currPerson.getLastName();
 
             textView = eventItemView.findViewById(R.id.personFromEvent);
             textView.setText(name);
 
-            //TODO add stuff for image button
+            ImageButton button = eventItemView.findViewById(R.id.eventListButton);
+            Drawable icon = new IconDrawable(eventItemView.getContext(),
+                    FontAwesomeIcons.fa_map_marker)
+                    .colorRes(R.color.black)
+                    .actionBarSize();
+            button.setImageDrawable(icon);
+
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(eventItemView.getContext(), "Event not Ready", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+
         }
 
         private void initializeFamilyView(View familyItemView, final int childPosition) {
+            Person currPerson = family.get(childPosition);
+            String personInfo = currPerson.getFirstName() + " " + currPerson.getLastName();
 
+            TextView textView = familyItemView.findViewById(R.id.personListName);
+            textView.setText(personInfo);
+
+            String relation = "Child";
+
+            if (currPerson.getPersonID().equals(person.getFatherID())) {
+                relation = "Father";
+            }
+            else if (currPerson.getPersonID().equals(person.getMotherID())) {
+                relation = "Mother";
+            }
+            else if (currPerson.getPersonID().equals(person.getSpouseID())) {
+                relation = "Spouse";
+            }
+
+            textView = familyItemView.findViewById(R.id.personRelation);
+            textView.setText(relation);
+
+            ImageButton button = familyItemView.findViewById(R.id.personListButton);
+            Drawable icon;
+
+            if (currPerson.getGender().equals("m")) {
+                icon = new IconDrawable(familyItemView.getContext(),
+                        FontAwesomeIcons.fa_male)
+                        .colorRes(R.color.maleBlue)
+                        .actionBarSize();
+            }
+            else {
+                icon = new IconDrawable(familyItemView.getContext(),
+                        FontAwesomeIcons.fa_female)
+                        .colorRes(R.color.femalePink)
+                        .actionBarSize();
+            }
+            button.setImageDrawable(icon);
+
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(PersonActivity.this, PersonActivity.class);
+                    intent.putExtra(PersonActivity.PERSON_KEY, currPerson.getPersonID());
+                    startActivity(intent);
+                }
+            });
         }
     }
 }
