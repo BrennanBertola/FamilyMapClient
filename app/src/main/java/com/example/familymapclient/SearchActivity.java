@@ -9,9 +9,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -29,7 +33,7 @@ import ServerSide.DataCache;
 public class SearchActivity extends AppCompatActivity {
 
     private static final int EVENT = 0;
-    private static final int PERSON = 0;
+    private static final int PERSON = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,9 +44,6 @@ public class SearchActivity extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle("Family Map: Search");
 
-        RecyclerView recView = findViewById(R.id.searchView);
-        recView.setLayoutManager(new LinearLayoutManager(SearchActivity.this));
-
         ImageView image = findViewById(R.id.searchIcon);
         Drawable icon = new IconDrawable(this,
                 FontAwesomeIcons.fa_search)
@@ -50,11 +51,56 @@ public class SearchActivity extends AppCompatActivity {
                 .actionBarSize();
         image.setImageDrawable(icon);
 
+        Button button = findViewById(R.id.searchButton);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText editText = findViewById(R.id.searchInput);
+                String search = editText.getText().toString();
+                if (!search.equals("")) {
+                    updateResults(search);
+                }
+            }
+        });
+
         DataCache cache = DataCache.getInstance();
         List<Person> people = new ArrayList<>();
         List<Event> events = new ArrayList<>();
 
+        RecyclerView recView = findViewById(R.id.searchView);
+        recView.setLayoutManager(new LinearLayoutManager(SearchActivity.this));
         RecyclerViewAdapter adapter = new RecyclerViewAdapter(events, people);
+        recView.setAdapter(adapter);
+    }
+
+    private void updateResults(String search) {
+        DataCache cache = DataCache.getInstance();
+        List<Person> people = cache.getPeopleList();
+        List<Event> events = cache.getEventList();
+
+
+        List<Person> filteredPeople = new ArrayList<>();
+        for (int i = 0; i < people.size(); ++i) {
+            Person curr = people.get(i);
+            String name = (curr.getFirstName() + " " + curr.getLastName()).toLowerCase();
+            if(name.contains(search.toLowerCase())) {
+                filteredPeople.add(curr);
+            }
+        }
+
+        List<Event> filteredEvents = new ArrayList<>();
+        for (int i = 0; i < events.size(); ++i) {
+            Event curr = events.get(i);
+            String info = (curr.getEventType() + ": " + curr.getCity() + ", " +
+                    curr.getCountry() + " (" + curr.getYear() + ")").toLowerCase();
+            if(info.contains(search.toLowerCase()) && cache.showEvent(curr.getEventID())) {
+                filteredEvents.add(curr);
+            }
+        }
+
+        RecyclerView recView = findViewById(R.id.searchView);
+        recView.setLayoutManager(new LinearLayoutManager(SearchActivity.this));
+        RecyclerViewAdapter adapter = new RecyclerViewAdapter(filteredEvents, filteredPeople);
         recView.setAdapter(adapter);
     }
 

@@ -197,11 +197,13 @@ public class DataCache {
         }
 
         String spouseID = user.getSpouseID();
-        List<Event> spouseEvents = personEvents.get(spouseID);
-        for (int i = 0; i < spouseEvents.size(); ++i) {
-            Event currEvent = spouseEvents.get(i);
-            if(shouldAddEvent(currEvent)) {
-                showedEvents.put(currEvent.getEventID(), true);
+        if (spouseID != null) {
+            List<Event> spouseEvents = personEvents.get(spouseID);
+            for (int i = 0; i < spouseEvents.size(); ++i) {
+                Event currEvent = spouseEvents.get(i);
+                if (shouldAddEvent(currEvent)) {
+                    showedEvents.put(currEvent.getEventID(), true);
+                }
             }
         }
 
