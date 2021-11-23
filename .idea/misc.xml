@@ -4,8 +4,11 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/brenn/AndroidStudioProjects/FamilyMapClient/app/src/main/res/layout/activity_main.xml" value="0.2695035460992908" />
+        <entry key="..\:/Users/brenn/cs240/FamilyMapClient/app/src/main/res/layout/activity_event.xml" value="0.2695035460992908" />
         <entry key="..\:/Users/brenn/cs240/FamilyMapClient/app/src/main/res/layout/activity_main.xml" value="0.2695035460992908" />
         <entry key="..\:/Users/brenn/cs240/FamilyMapClient/app/src/main/res/layout/activity_person.xml" value="0.19832826747720364" />
+        <entry key="..\:/Users/brenn/cs240/FamilyMapClient/app/src/main/res/layout/activity_search.xml" value="0.16033434650455927" />
+        <entry key="..\:/Users/brenn/cs240/FamilyMapClient/app/src/main/res/layout/activity_setting.xml" value="0.28532608695652173" />
         <entry key="..\:/Users/brenn/cs240/FamilyMapClient/app/src/main/res/layout/event_item.xml" value="0.16160081053698075" />
         <entry key="..\:/Users/brenn/cs240/FamilyMapClient/app/src/main/res/layout/item_list.xml" value="0.16160081053698075" />
         <entry key="..\:/Users/brenn/cs240/FamilyMapClient/app/src/main/res/layout/login_fragment.xml" value="0.3333333333333333" />

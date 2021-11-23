@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.joanzapata.iconify.IconDrawable;
 import com.joanzapata.iconify.fonts.FontAwesomeIcons;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Model.Event;
@@ -37,6 +38,7 @@ public class PersonActivity extends AppCompatActivity {
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle("Family Map: Person");
 
         Intent intent = getIntent();
         String personID = intent.getStringExtra(PERSON_KEY);
@@ -57,7 +59,15 @@ public class PersonActivity extends AppCompatActivity {
             textView.setText("Female");
         }
 
-        List<Event> events = cache.getSortedEvents(personID);
+        List<Event> tmp = cache.getSortedEvents(personID);
+        List<Event> events = new ArrayList<>();
+        for (int i = 0; i < tmp.size(); ++i) {
+            Event curr = tmp.get(i);
+            if(cache.showEvent(curr.getEventID())) {
+                events.add(curr);
+            }
+        }
+
         List<Person> family = cache.getFamily(personID);
 
         ExpandableListView expandableListView = findViewById(R.id.expandableListView);
@@ -219,7 +229,9 @@ public class PersonActivity extends AppCompatActivity {
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(eventItemView.getContext(), "Event not Ready", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(PersonActivity.this, EventActivity.class);
+                    intent.putExtra(EventActivity.EVENT_KEY, event.getEventID());
+                    startActivity(intent);
                 }
             });
 

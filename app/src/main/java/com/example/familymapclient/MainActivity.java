@@ -38,20 +38,23 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.Lis
         getSupportActionBar().setTitle("Family Map");
 
         FragmentManager fragmentManager = this.getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentFrameLayout);
-        if(fragment == null) {
-            fragment = createLoginFragment();
+        Fragment fragment = createLoginFragment();
+        fragmentManager.beginTransaction()
+                .add(R.id.fragmentFrameLayout, fragment)
+                .commit();
+    }
 
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        DataCache cache = DataCache.getInstance();
+        if (cache == null) return;
+        if(!cache.isLoggedIn()) {
+            FragmentManager fragmentManager = this.getSupportFragmentManager();
+            Fragment fragment = createLoginFragment();
             fragmentManager.beginTransaction()
-                    .add(R.id.fragmentFrameLayout, fragment)
+                    .replace(R.id.fragmentFrameLayout, fragment)
                     .commit();
-        } else {
-            // If the fragment is not null, the MainActivity was destroyed and recreated
-            // so we need to reset the listener to the new instance of the fragment
-            if(fragment instanceof LoginFragment) {
-                ((LoginFragment) fragment).registerListener(this);
-            }
         }
     }
 
@@ -71,6 +74,18 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.Lis
     public void switchToPerson(Person person) {
         Intent intent = new Intent(MainActivity.this, PersonActivity.class);
         intent.putExtra(PersonActivity.PERSON_KEY, person.getPersonID());
+        startActivity(intent);
+    }
+
+    @Override
+    public void switchToSearch() {
+        Intent intent = new Intent(MainActivity.this, SearchActivity.class);
+        startActivity(intent);
+    }
+
+    @Override
+    public void switchToSettings() {
+        Intent intent = new Intent(MainActivity.this, SettingActivity.class);
         startActivity(intent);
     }
 

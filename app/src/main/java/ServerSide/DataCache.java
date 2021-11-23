@@ -16,6 +16,38 @@ public class DataCache {
 
     private static DataCache instance;
 
+    private Person user;
+    private static String authToken;
+
+    //setting related information
+    boolean loggedIn = false;
+    boolean familyLines = true;
+    boolean spouseLines = true;
+    boolean eventLines = true;
+
+    boolean haveFatherSide = true;
+    boolean haveMotherSide = true;
+    boolean maleEvents = true;
+    boolean femaleEvents = true;
+
+    private HashMap<String, Boolean> showedEvents;
+
+    //uses Person id as Key for more quicker look up.
+    private ArrayList<Person> peopleList;
+    private HashMap<String, Person> people;
+    private HashMap<String, List<Event>> personEvents;
+
+    //use event id as key.
+    private HashMap<String, Event> events;
+    private ArrayList<Event> eventList;
+
+    private float[] colors = {210, 330, 120, 270, 240, 30, 300, 60, 0};
+    HashMap<String, Float> colorKey = new HashMap<>();
+
+    //stores person IDs on dad and mom side.
+    private TreeSet<String> dadSide;
+    private TreeSet<String> momSide;
+
     //only used within login task
     public static void createCache(String givenToken, String personID) {
         instance = new DataCache(givenToken, personID);
@@ -39,7 +71,9 @@ public class DataCache {
         dadSide = new TreeSet<>();
         momSide = new TreeSet<>();
 
-        //user is in neither, easy fix if you don't want this down the road.
+        dadSide.add(user.getPersonID());
+        momSide.add(user.getPersonID());
+
         findSides(people.get(user.getFatherID()), true);
         findSides(people.get(user.getMotherID()), false);
         loggedIn = true;
@@ -59,6 +93,7 @@ public class DataCache {
         events = new HashMap<>();
         showedEvents = new HashMap<>();
         peopleList = new ArrayList<>();
+        eventList = new ArrayList<>();
 
         ServerProxy proxy = new ServerProxy();
 
@@ -80,6 +115,7 @@ public class DataCache {
         for (int i = 0; i < eventData.length; ++i) {
             events.put(eventData[i].getEventID(), eventData[i]);
             showedEvents.put(eventData[i].getEventID(), true);
+            eventList.add(eventData[i]);
 
             String key = eventData[i].getPersonID();
             if(personEvents.containsKey(key)) {
@@ -93,6 +129,26 @@ public class DataCache {
                 tmp.add(eventData[i]);
                 personEvents.put(key, tmp);
             }
+        }
+    }
+
+    private void findSides(Person person, boolean fatherSide) {
+        if (person == null) {
+            return;
+        }
+
+        if (fatherSide) {
+            dadSide.add(person.getPersonID());
+        }
+        else {
+            momSide.add(person.getPersonID());
+        }
+
+        if (people.containsKey(person.getFatherID())) {
+            findSides(people.get(person.getFatherID()), fatherSide);
+        }
+        if (people.containsKey(person.getMotherID())) {
+            findSides(people.get(person.getMotherID()), fatherSide);
         }
     }
 
@@ -128,47 +184,87 @@ public class DataCache {
         return newList;
     }
 
-    //==================Data Management Portion================//
+    public void updateShowedEvents() {
+        showedEvents = new HashMap<>();
 
-    private Person user;
-    private static String authToken;
-    boolean loggedIn = false;
-
-    //uses Person id as Key for more quicker look up.
-    private ArrayList<Person> peopleList;
-    private HashMap<String, Person> people;
-    private HashMap<String, List<Event>> personEvents;
-
-    //use event id as key.
-    private HashMap<String, Event> events;
-    private HashMap<String, Boolean> showedEvents;
-
-    //stores person IDs on dad and mom side.
-    private TreeSet<String> dadSide;
-    private TreeSet<String> momSide;
-
-    private void findSides(Person person, boolean fatherSide) {
-        if (person == null) {
-            return;
+        String userID = user.getPersonID();
+        List<Event> userEvents = personEvents.get(userID);
+        for (int i = 0; i < userEvents.size(); ++i) {
+            Event currEvent = userEvents.get(i);
+            if(shouldAddEvent(currEvent)) {
+                showedEvents.put(currEvent.getEventID(), true);
+            }
         }
 
-        if (fatherSide) {
-            dadSide.add(person.getPersonID());
-        }
-        else {
-            momSide.add(person.getPersonID());
+        String spouseID = user.getSpouseID();
+        List<Event> spouseEvents = personEvents.get(spouseID);
+        for (int i = 0; i < spouseEvents.size(); ++i) {
+            Event currEvent = spouseEvents.get(i);
+            if(shouldAddEvent(currEvent)) {
+                showedEvents.put(currEvent.getEventID(), true);
+            }
         }
 
-        if (people.containsKey(person.getFatherID())) {
-            findSides(people.get(person.getFatherID()), fatherSide);
+        if(haveFatherSide) {
+            Iterator it = dadSide.iterator();
+            while(it.hasNext()) {
+                String currID = (String) it.next();
+                List<Event> events = personEvents.get(currID);
+
+                for (int i = 0; i < events.size(); ++i) {
+                    Event currEvent = events.get(i);
+                    if(shouldAddEvent(currEvent)) {
+                        showedEvents.put(currEvent.getEventID(), true);
+                    }
+                }
+            }
         }
-        if (people.containsKey(person.getMotherID())) {
-            findSides(people.get(person.getMotherID()), fatherSide);
+
+        if(haveMotherSide) {
+            Iterator it = momSide.iterator();
+            while(it.hasNext()) {
+                String currID = (String) it.next();
+                List<Event> events = personEvents.get(currID);
+
+                for (int i = 0; i < events.size(); ++i) {
+                    Event currEvent = events.get(i);
+                    if(shouldAddEvent(currEvent)) {
+                        showedEvents.put(currEvent.getEventID(), true);
+                    }
+                }
+            }
         }
     }
 
+    private boolean shouldAddEvent(Event event) {
+        Person person = people.get(event.getPersonID());
+
+        if(person.getGender().equals("m") && !maleEvents) {
+            return false;
+        }
+        if(person.getGender().equals("f") && !femaleEvents) {
+            return false;
+        }
+
+        return true;
+    }
+
+    //==================Data Management Portion================//
+
     public Person getUser() {
         return user;
+    }
+
+    public float[] getColors() {
+        return colors;
+    }
+
+    public HashMap<String, Float> getColorKey() {
+        return colorKey;
+    }
+
+    public void setColorKey(HashMap<String, Float> colorKey) {
+        this.colorKey = colorKey;
     }
 
     public static String getAuthToken() {
@@ -182,6 +278,15 @@ public class DataCache {
     }
 
     public List<Event> getPersonEvents(String id) { return personEvents.get(id);}
+
+    public ArrayList<Person> getPeopleList() {
+        return peopleList;
+    }
+
+    public ArrayList<Event> getEventList() {
+        return eventList;
+    }
+
     public List<Event> getSortedEvents(String id) {
         List<Event> returnVal = personEvents.get(id);
         return sortList(returnVal);
@@ -197,7 +302,13 @@ public class DataCache {
     public HashMap<String, Event> getEvents() {
         return events;
     }
-    public boolean showEvent(String id) {return showedEvents.get(id);}
+
+    public boolean showEvent(String id) {
+        if (showedEvents.get(id) == null) {
+            return false;
+        }
+        return showedEvents.get(id);
+    }
 
     public TreeSet<String> getDadSide() {
         return dadSide;
@@ -252,4 +363,66 @@ public class DataCache {
 
         return retList;
     }
+
+    public void setLoggedIn(boolean loggedIn) {
+        this.loggedIn = loggedIn;
+    }
+
+    public boolean getFamilyLines() {
+        return familyLines;
+    }
+
+    public void setFamilyLines(boolean familyLines) {
+        this.familyLines = familyLines;
+    }
+
+    public boolean getSpouseLines() {
+        return spouseLines;
+    }
+
+    public void setSpouseLines(boolean spouseLines) {
+        this.spouseLines = spouseLines;
+    }
+
+    public boolean getEventLines() {
+        return eventLines;
+    }
+
+    public void setEventLines(boolean eventLiens) {
+        this.eventLines = eventLiens;
+    }
+
+    public boolean isFatherSide() {
+        return haveFatherSide;
+    }
+
+    public void setFatherSide(boolean fatherSide) {
+        this.haveFatherSide = fatherSide;
+    }
+
+    public boolean isMotherSide() {
+        return haveMotherSide;
+    }
+
+    public void setMotherSide(boolean motherSide) {
+        this.haveMotherSide = motherSide;
+    }
+
+    public boolean isMaleEvents() {
+        return maleEvents;
+    }
+
+    public void setMaleEvents(boolean maleEvents) {
+        this.maleEvents = maleEvents;
+    }
+
+    public boolean isFemaleEvents() {
+        return femaleEvents;
+    }
+
+    public void setFemaleEvents(boolean femaleEvents) {
+        this.femaleEvents = femaleEvents;
+    }
+
+
 }

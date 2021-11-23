@@ -1,12 +1,12 @@
 package com.example.familymapclient;
 
 
-import android.app.ActionBar;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -48,15 +48,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private GoogleMap map;
     private View view;
     private DataCache cache;
-    private HashMap<Event, Marker> markers;
+    private List<Marker> markers;
+    private Map<String, Marker> idToMarker;
     private List<Polyline> lines;
-    private float[] colors = {210, 330, 120, 270, 240, 30, 300, 60, 0};
+
     private int currColor = 0;
     private Person person = null;
+
+    private String eventID = "";
+    private boolean eventView = false;
+
+    public static final String MAP_KEY = "map key";
 
     private Listener listener;
     public interface Listener {
         void switchToPerson(Person person);
+        void switchToSettings();
+        void switchToSearch();
     }
     public void registerListener(MapFragment.Listener listener) {
         this.listener = listener;
@@ -72,6 +80,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         Iconify.with(new FontAwesomeModule());
 
         ImageButton button = view.findViewById(R.id.personButton);
+        Drawable icon = new IconDrawable(getActivity(), FontAwesomeIcons.fa_map_marker)
+                .colorRes(R.color.black)
+                .actionBarSize();
+        button.setImageDrawable(icon);
+        button.setEnabled(false);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -80,35 +93,48 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 }
             }
         });
+
+        if (getArguments() != null) {
+            eventID = getArguments().getString(MAP_KEY);
+            eventView = true;
+        }
+
         return view;
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.main_menu, menu);
+        if (!eventView) {
+            inflater.inflate(R.menu.main_menu, menu);
+            MenuItem menuItem = menu.findItem(R.id.searchMenuItem);
+            menuItem.setIcon(new IconDrawable(getActivity(), FontAwesomeIcons.fa_search)
+                    .colorRes(R.color.white)
+                    .actionBarSize());
 
-        MenuItem menuItem = menu.findItem(R.id.searchMenuItem);
-        menuItem.setIcon(new IconDrawable(getActivity(), FontAwesomeIcons.fa_search)
-                .colorRes(R.color.white)
-                .actionBarSize());
-
-        menuItem = menu.findItem(R.id.settingMenuItem);
-        menuItem.setIcon(new IconDrawable(getActivity(), FontAwesomeIcons.fa_gear)
-                .colorRes(R.color.white)
-                .actionBarSize());
+            menuItem = menu.findItem(R.id.settingMenuItem);
+            menuItem.setIcon(new IconDrawable(getActivity(), FontAwesomeIcons.fa_gear)
+                    .colorRes(R.color.white)
+                    .actionBarSize());
+        }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem menu) {
-        switch(menu.getItemId()) {
-            case R.id.searchMenuItem:
-                Toast.makeText(getActivity(), getString(R.string.searchSelected), Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.settingMenuItem:
-                Toast.makeText(getActivity(), getString(R.string.settingSelected), Toast.LENGTH_SHORT).show();
-                return true;
-            default:
-                return super.onOptionsItemSelected(menu);
+        if (eventView) {
+            getActivity().finish();
+            return super.onOptionsItemSelected(menu);
+        }
+        else {
+            switch (menu.getItemId()) {
+                case R.id.searchMenuItem:
+                    listener.switchToSearch();
+                    return true;
+                case R.id.settingMenuItem:
+                    listener.switchToSettings();
+                    return true;
+                default:
+                    return super.onOptionsItemSelected(menu);
+            }
         }
     }
 
@@ -128,13 +154,49 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 return true;
             }
         });
+
+       if (eventView) {
+           Marker marker = idToMarker.get(eventID);
+           Event event = (Event) marker.getTag();
+
+           LatLng location = new LatLng(event.getLatitude(), event.getLongitude());
+           map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 4));
+
+           updateInfo(marker);
+           addLines(marker);
+       }
     }
 
     @Override
     public void onMapLoaded() {
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (map != null) {
+            addMarkers();
+            updateInfo(null);
+            removeLines();
+        }
     }
 
     private void updateInfo(Marker marker) {
+        if (marker == null){
+            TextView textView = view.findViewById(R.id.eventInfo);
+            String info = "Select an event to see more details";
+            textView.setText(info);
+
+            ImageButton button = view.findViewById(R.id.personButton);
+            Drawable icon = new IconDrawable(getActivity(), FontAwesomeIcons.fa_map_marker)
+                    .colorRes(R.color.black)
+                    .actionBarSize();
+            button.setImageDrawable(icon);
+            button.setEnabled(false);
+            return;
+        }
+
         Event event = (Event) marker.getTag();
         Person person = cache.getPerson(event.getPersonID());
         this.person = person;
@@ -163,10 +225,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         textView.setText(info);
     }
 
+    private void removeMarkers() {
+        if (markers != null) {
+            for (int i = 0; i < markers.size(); ++i) {
+                Marker tmp = markers.get(i);
+                tmp.remove();
+            }
+        }
+    }
+
     private void addMarkers() {
-        markers = new HashMap<>();
+        removeMarkers();
+        currColor = 0;
+
+        markers = new ArrayList<>();
+        idToMarker = new HashMap<>();
+
         HashMap<String, Event> events = cache.getEvents();
-        HashMap<String, Float> colorKey = new HashMap<>();
+
+        HashMap<String, Float> colorKey = cache.getColorKey();
+        float[] colors = cache.getColors();
 
         Iterator it = events.entrySet().iterator();
         while (it.hasNext()) {
@@ -191,24 +269,38 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                     icon(BitmapDescriptorFactory.defaultMarker(color))
                     .title(event.getEventType()));
             marker.setTag(event);
-            markers.put(event, marker);
+
+            markers.add(marker);
+            idToMarker.put(event.getEventID(), marker);
         }
     }
 
-    private void addLines(Marker marker) {
+    private void removeLines() {
         if (lines != null) {
             for (int i = 0; i < lines.size(); ++i) {
                 Polyline tmp = lines.get(i);
                 tmp.remove();
             }
         }
+    }
+
+    private void addLines(Marker marker) {
+        removeLines();
 
         Event selectedEvent = (Event) marker.getTag();
         lines = new ArrayList<>();
 
-        spouseLines(selectedEvent);
-        familyTreeLines(selectedEvent);
-        lifeStoryLines(selectedEvent);
+        if (cache.getSpouseLines()) {
+            spouseLines(selectedEvent);
+        }
+
+        if (cache.getFamilyLines()) {
+            familyTreeLines(selectedEvent);
+        }
+
+        if (cache.getEventLines()) {
+            lifeStoryLines(selectedEvent);
+        }
     }
 
     private void spouseLines(Event event) {

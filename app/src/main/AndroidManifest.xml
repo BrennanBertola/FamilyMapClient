@@ -16,9 +16,21 @@
         android:theme="@style/Theme.FamilyMapClient"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".PersonActivity"
+            android:name=".SearchActivity"
             android:exported="false"
             android:noHistory="true"/>
+        <activity
+            android:name=".SettingActivity"
+            android:exported="false"
+            android:noHistory="true" />
+        <activity
+            android:name=".EventActivity"
+            android:exported="false"
+            android:noHistory="true" />
+        <activity
+            android:name=".PersonActivity"
+            android:exported="false"
+            android:noHistory="true" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
